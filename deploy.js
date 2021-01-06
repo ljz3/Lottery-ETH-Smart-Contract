@@ -9,9 +9,6 @@ const provider = new HDWalletProvider(
 
 const web3 = new Web3(provider);
 
-
-const INIT_STR = 'hello'
-
 const deploy = async () => {
 
     const accounts = await web3.eth.getAccounts();
@@ -20,6 +17,7 @@ const deploy = async () => {
         .deploy({data: '0x' + bytecode}) // add 0x bytecode
         .send({from: accounts[0]}); // remove 'gas'
 
+    console.log(interface);
     console.log('Contract deployed to', result.options.address);
 };
 deploy();
