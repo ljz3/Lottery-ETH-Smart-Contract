@@ -10,7 +10,8 @@ class App extends Component{
     manager: '',
     players: [],
     balance: '',
-    value: ''
+    value: '',
+    message: ''
   };
 
   async componentDidMount(){
@@ -20,6 +21,31 @@ class App extends Component{
     this.setState({manager, players, balance});
   }
 
+  onSubmit = async (event) =>{
+    event.preventDefault();
+
+    const accounts = await web3.eth.getAccounts();
+
+    this.setState({message: 'Waiting on transaction success...'});
+
+    await lottery.methods.enter().send({
+      from: accounts[0],
+      value: web3.utils.toWei(this.state.value, 'ether')
+    });
+
+    this.setState({message: 'Entry successful!'});
+  }
+
+  onClick = async (event) =>{
+    const accounts = await web3.eth.getAccounts();
+    this.setState({message: 'Waiting on draw...'});
+    await lottery.methods.pickWinner().send({
+      from: accounts[0]
+    });
+    this.setState({message: 'Draw successful!'});
+
+  }
+
   render(){
     web3.eth.getAccounts().then(console.log);
 
@@ -27,12 +53,12 @@ class App extends Component{
       <div>
         <h2>Lottery Contract</h2>
         <p>
-          This contract is managed by {this.state.manager}
-          There are currently {this.state.players.length} entries,
+          This contract is managed by {this.state.manager} 
+          There are currently {this.state.players.length} entries, 
           with a prize pool of {web3.utils.fromWei(this.state.balance, 'ether')} ETH
         </p>
         <hr />
-        <form>
+        <form onSubmit = {this.onSubmit}>
           <h4>Click to enter lottery</h4>
           <div>
             <label>Amount of ETH to enter</label>
@@ -40,6 +66,11 @@ class App extends Component{
           </div>
           <button>Enter</button>
         </form>
+        <hr/>
+        <h4>Click to draw a winner</h4>
+        <button onClick = {this.onClick}>Draw</button>
+        <hr/>
+        <h1>{this.state.message}</h1>
       </div>
     );
   }
